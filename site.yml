@@ -12,6 +12,9 @@
     - role: docker_install
       tags: ['docker', 'install']
 
+    - role: certbot_ssl
+      tags: ['ssl', 'certbot']
+
     - role: nginx_container
       tags: ['nginx', 'containers']
 
