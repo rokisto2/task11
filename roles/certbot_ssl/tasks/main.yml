@@ -1,21 +1,12 @@
 ---
 - name: Deploy SSL certificates with certbot
   block:
-    - name: Install certbot and dependencies
+    - name: Install certbot
       ansible.builtin.apt:
         name:
           - certbot
-          - python3-certbot-nginx
         state: present
         update_cache: yes
-
-    - name: Create webroot directory for certbot
-      ansible.builtin.file:
-        path: "{{ certbot_webroot_path }}"
-        state: directory
-        mode: '0755'
-        owner: root
-        group: root
 
     - name: Stop nginx container temporarily for certificate generation
       community.docker.docker_container:
@@ -65,9 +56,7 @@
     - name: Set up certificate renewal cron job
       ansible.builtin.cron:
         name: "Renew Let's Encrypt certificates"
-        minute: "0"
-        hour: "3"
-        day: "*/7"
+        special_time: weekly
         job: >
           certbot renew --quiet --deploy-hook
           "cp {{ letsencrypt_dir }}/live/{{ certbot_domain }}/fullchain.pem /etc/nginx/ssl/my_certificate.crt &&
@@ -95,14 +84,13 @@
 
     - name: Revoke Let's Encrypt certificates
       ansible.builtin.command:
-        cmd: certbot revoke --cert-path {{ letsencrypt_dir }}/live/{{ certbot_domain }}/cert.pem --delete-after-revoke
+        cmd: certbot revoke --cert-path "{{ letsencrypt_dir }}/live/{{ certbot_domain }}/cert.pem" --delete-after-revoke
       ignore_errors: yes
 
-    - name: Remove certbot and dependencies
+    - name: Remove certbot
       ansible.builtin.apt:
         name:
           - certbot
-          - python3-certbot-nginx
         state: absent
         autoremove: yes
 
