@@ -1,0 +1,13 @@
+server {
+    listen  {{ nginx_container_port }} ssl;
+    server_name {{ nginx_domen }};
+
+    ssl_certificate /etc/nginx/ssl/my_certificate.crt;
+    ssl_certificate_key /etc/nginx/ssl/my_private_key.pem;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+        add_header X-Managed-By Ansible;
+    }
+}

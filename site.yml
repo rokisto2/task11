@@ -1,0 +1,18 @@
+---
+- name: Deploy Docker and Containers
+  hosts: all
+  become: yes
+  vars_files:
+    # Encrypted variables should be here.
+    # We use a vault file that contains both DB secrets and connection details if needed
+    - vars/encrypted_vars.yml
+  
+  roles:
+
+    - role: docker_install
+      tags: ['docker', 'install']
+
+    - role: nginx_container
+      tags: ['nginx', 'containers']
+
+  

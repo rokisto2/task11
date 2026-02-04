@@ -1,0 +1,8 @@
+---
+nginx_container_state: present
+nginx_container_name: custom_nginx
+nginx_image: nginx:latest
+nginx_host_port: 80
+nginx_container_port: 443
+nginx_custom_message: "Hello from Ansible-managed Nginx!"
+nginx_domen:  myk8s-qqq.webhop.me

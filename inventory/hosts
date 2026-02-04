@@ -1,0 +1,3 @@
+[servers]
+target_server ansible_host=98.87.155.90 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+

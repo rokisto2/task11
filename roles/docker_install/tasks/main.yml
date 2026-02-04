@@ -1,0 +1,49 @@
+---
+- name: Check if uninstall is requested
+  ansible.builtin.include_tasks: uninstall.yml
+  when: docker_install_state == 'absent'
+
+- name: Install Docker tasks
+  block:
+    - name: Install prerequisites
+      ansible.builtin.apt:
+        name: "{{ docker_prerequisites }}"
+        state: present
+        update_cache: yes
+
+    - name: Create directory for Docker's GPG key
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Add Docker's official GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+        force: true
+
+    - name: Add Docker repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ ansible_architecture | replace('x86_64', 'amd64') }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+    - name: Install Docker packages
+      ansible.builtin.apt:
+        name: "{{ docker_packages }}"
+        state: present
+        update_cache: yes
+
+    - name: Manage Docker service state
+      ansible.builtin.service:
+        name: docker
+        state: "{{ docker_service_state }}"
+        enabled: "{{ docker_service_enabled }}"
+
+    - name: Install python3-docker for ansible docker modules
+      ansible.builtin.apt:
+        name: python3-docker
+        state: present
+  when: docker_install_state == 'present'

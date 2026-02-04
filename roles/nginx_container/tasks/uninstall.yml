@@ -1,0 +1,11 @@
+---
+- name: Remove Nginx container
+  community.docker.docker_container:
+    name: "{{ nginx_container_name }}"
+    state: absent
+  ignore_errors: yes
+
+- name: Remove Nginx config directory
+  ansible.builtin.file:
+    path: /opt/nginx
+    state: absent

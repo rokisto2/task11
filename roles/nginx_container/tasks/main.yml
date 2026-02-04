@@ -1,0 +1,42 @@
+---
+- name: Check if uninstall is requested
+  ansible.builtin.include_tasks: uninstall.yml
+  when: nginx_container_state == 'absent'
+
+- name: Deploy Nginx Container tasks
+  block:
+    - name: Create nginx config directory
+      ansible.builtin.file:
+        path: /opt/nginx/conf.d
+        state: directory
+        mode: '0755'
+        recurse: yes
+
+    - name: Deploy custom nginx config
+      ansible.builtin.template:
+        src: custom_nginx.conf.j2
+        dest: /opt/nginx/conf.d/default.conf
+        mode: '0644'
+      notify: Restart Nginx Container
+
+    - name: Deploy custom index.html
+      ansible.builtin.copy:
+        content: "<h1>{{ nginx_custom_message }}</h1>"
+        dest: /opt/nginx/index.html
+        mode: '0644'
+      notify: Restart Nginx Container
+
+    - name: Start Nginx container
+      community.docker.docker_container:
+        name: "{{ nginx_container_name }}"
+        image: "{{ nginx_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "{{ nginx_host_port }}:{{ nginx_container_port }}"
+        volumes:
+          - /opt/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+          - /opt/nginx/index.html:/usr/share/nginx/html/index.html:ro
+          - /etc/nginx/ssl/my_certificate.crt:/etc/nginx/ssl/my_certificate.crt:ro
+          - /etc/nginx/ssl/my_private_key.pem:/etc/nginx/ssl/my_private_key.pem:ro
+  when: nginx_container_state == 'present'
