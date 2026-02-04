@@ -7,6 +7,7 @@
 - **inventory/hosts**: Файл инвентаря с адресом целевого сервера.
 - **roles/**:
   - `docker_install`: Установка Docker CE и зависимостей.
+  - `certbot_ssl`: Автоматическое получение SSL сертификатов от Let's Encrypt.
   - `nginx_container`: Запуск Nginx с кастомным конфигом.
   - `postgres_container`: Запуск основного PostgreSQL.
   - `pg_cron_container`: Запуск PostgreSQL с pg_cron и его настройка.
@@ -35,6 +36,22 @@ ansible-vault view vars/encrypted_vars.yml --vault-password-file .vault_pass
 - `postgres_password`: Пароль от основной БД.
 - `pg_cron_password`: Пароль от БД pg_cron.
 
+## SSL Сертификаты
+
+Проект автоматически получает бесплатные SSL сертификаты от Let's Encrypt для вашего домена. Роль `certbot_ssl` выполняет следующие действия:
+
+1. Устанавливает certbot и необходимые зависимости
+2. Получает SSL сертификат для домена, указанного в переменной `nginx_domen` (по умолчанию: myk8s-qqq.webhop.me)
+3. Копирует сертификаты в каталог `/etc/nginx/ssl/` для использования Nginx
+4. Настраивает автоматическое обновление сертификатов через cron (каждые 7 дней в 3:00 ночи)
+
+**Важно**: Для успешного получения сертификата домен должен быть настроен и указывать на IP-адрес вашего сервера.
+
+Вы можете настроить email для уведомлений Let's Encrypt, добавив переменную в плейбук:
+```bash
+ansible-playbook -i inventory/hosts site.yml --vault-password-file .vault_pass -e "certbot_email=your_email@example.com"
+```
+
 ## Запуск деплоя
 
 Чтобы раскатать конфигурацию на сервер, выполните:
@@ -45,10 +62,10 @@ ansible-playbook -i inventory/hosts site.yml --vault-password-file .vault_pass
 
 ## Удаление (Uninstall)
 
-Чтобы удалить все установленные компоненты (контейнеры, данные, сам Docker), запустите плейбук с переменными состояния `absent`:
+Чтобы удалить все установленные компоненты (контейнеры, данные, сам Docker, SSL сертификаты), запустите плейбук с переменными состояния `absent`:
 
 ```bash
-ansible-playbook -i inventory/hosts site.yml --vault-password-file .vault_pass -e "docker_install_state=absent nginx_container_state=absent postgres_container_state=absent pg_cron_container_state=absent"
+ansible-playbook -i inventory/hosts site.yml --vault-password-file .vault_pass -e "docker_install_state=absent certbot_ssl_state=absent nginx_container_state=absent postgres_container_state=absent pg_cron_container_state=absent"
 ```
 
 ## Проверка работоспособности

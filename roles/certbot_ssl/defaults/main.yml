@@ -1,0 +1,6 @@
+---
+certbot_ssl_state: present
+certbot_email: admin@example.com
+certbot_domain: "{{ nginx_domen }}"
+certbot_webroot_path: /var/www/certbot
+letsencrypt_dir: /etc/letsencrypt
