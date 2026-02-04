@@ -1,5 +1,18 @@
+# HTTP server
 server {
-    listen  {{ nginx_container_port }} ssl;
+    listen  80;
+    server_name {{ nginx_domen }};
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+        add_header X-Managed-By Ansible;
+    }
+}
+
+# HTTPS server
+server {
+    listen  443 ssl;
     server_name {{ nginx_domen }};
 
     ssl_certificate /etc/nginx/ssl/my_certificate.crt;

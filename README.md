@@ -55,7 +55,9 @@ ansible-playbook -i inventory/hosts site.yml --vault-password-file .vault_pass -
 
 После деплоя можно проверить:
 
-1. **Nginx**: `curl http://34.205.71.187:8080` (должен вернуть "Hello from Ansible-managed Nginx!").
+1. **Nginx**: 
+   - HTTP: `curl http://34.205.71.187:8080` (должен вернуть "Hello from Ansible-managed Nginx!")
+   - HTTPS: `curl -k https://34.205.71.187:443` (должен вернуть "Hello from Ansible-managed Nginx!")
 
 2. **Docker**: `docker ps` на сервере.
 
